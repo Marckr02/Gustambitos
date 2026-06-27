@@ -22,6 +22,7 @@ const baseSprites = [
 ];
 
 const specialTypes = ['Gold', 'Gummy', 'Galaxy'];
+const rarityOrder = { mythic: 0, legendary: 1, epic: 2, rare: 3, common: 4, special: 5 };
 
 const specialTypeImages = {
   gold: {
@@ -88,7 +89,6 @@ function getSpecialImageByType(spriteId, type) {
   return specialTypeImages[typeKey]?.[spriteId] || '';
 }
 
-const rarityOrder = { mythic: 0, legendary: 1, epic: 2, rare: 3, common: 4, special: 5 };
 const gridElement = document.getElementById('spiritGrid');
 const resetAllButton = document.getElementById('resetAll');
 const logoutBtn = document.getElementById('logoutBtn');
@@ -101,16 +101,22 @@ const appContent = document.getElementById('appContent');
 const authForm = document.getElementById('authForm');
 const loginTab = document.getElementById('loginTab');
 const registerTab = document.getElementById('registerTab');
-const emailField = document.getElementById('emailField');
 const confirmField = document.getElementById('confirmField');
 const authSubmit = document.getElementById('authSubmit');
 const authError = document.getElementById('authError');
+const syncIndicator = document.getElementById('syncIndicator');
+const onboardingModal = document.getElementById('onboardingModal');
+const dashboardView = document.getElementById('dashboardView');
+const dashboardClose = document.getElementById('dashboardClose');
+const specialFilterBtns = document.querySelectorAll('.special-filter-btn');
 
 let spirits = [];
 let specials = [];
 let currentSort = 'default';
+let currentSpecialFilter = 'all';
 let selectedItemId = null;
 let currentUser = null;
+let saveTimeout = null;
 
 function generateSpecials() {
   return baseSprites
@@ -178,19 +184,49 @@ async function loadState() {
   });
 }
 
+function showSyncIndicator(status) {
+  syncIndicator.classList.remove('saving', 'saved', 'error');
+  if (status === 'saving') {
+    syncIndicator.textContent = 'Guardando...';
+    syncIndicator.classList.add('saving');
+  } else if (status === 'saved') {
+    syncIndicator.textContent = 'Guardado';
+    syncIndicator.classList.add('saved');
+    setTimeout(() => {
+      syncIndicator.textContent = '';
+      syncIndicator.classList.remove('saved');
+    }, 2000);
+  } else if (status === 'error') {
+    syncIndicator.textContent = 'Error al guardar';
+    syncIndicator.classList.add('error');
+  }
+}
+
 async function saveState() {
   if (!currentUser) return;
 
-  const states = [...spirits, ...specials].map(item => ({
-    user_id: currentUser.id,
-    spirit_id: item.id,
-    level: item.level,
-    lost: item.lost,
-    register: item.register,
-    dominated: item.dominated
-  }));
+  showSyncIndicator('saving');
 
-  await supabase.from('spirit_states').upsert(states, { onConflict: 'user_id,spirit_id' });
+  if (saveTimeout) clearTimeout(saveTimeout);
+
+  saveTimeout = setTimeout(async () => {
+    const states = [...spirits, ...specials].map(item => ({
+      user_id: currentUser.id,
+      spirit_id: item.id,
+      level: item.level,
+      lost: item.lost,
+      register: item.register,
+      dominated: item.dominated
+    }));
+
+    const { error } = await supabase.from('spirit_states').upsert(states, { onConflict: 'user_id,spirit_id' });
+
+    if (error) {
+      showSyncIndicator('error');
+    } else {
+      showSyncIndicator('saved');
+    }
+  }, 300);
 }
 
 function getDominatedCount() {
@@ -210,9 +246,20 @@ function capitalize(text) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+function triggerDominatedAnimation(card) {
+  card.classList.add('dominated-flash');
+  setTimeout(() => card.classList.remove('dominated-flash'), 800);
+}
+
+function triggerObtainedAnimation(card) {
+  card.classList.add('obtained-flash');
+  setTimeout(() => card.classList.remove('obtained-flash'), 600);
+}
+
 function createCard(item) {
   const card = document.createElement('article');
   card.className = 'card';
+  card.dataset.id = item.id;
 
   if (item.specialType) {
     card.classList.add(`special-${item.specialType.toLowerCase()}-card`);
@@ -241,7 +288,6 @@ function createCard(item) {
   }
 
   const badge = document.createElement('span');
-  const badgeRarity = item.specialType ? item.specialType.toLowerCase() : item.rarity;
   badge.className = item.specialType
     ? `badge special-${item.specialType.toLowerCase()}`
     : `badge ${item.rarity}`;
@@ -317,6 +363,7 @@ function createCard(item) {
   registerBtn.textContent = item.register ? 'Quitar' : 'Obtener';
   registerBtn.addEventListener('click', (e) => {
     e.stopPropagation();
+    const wasNotRegistered = !item.register;
     item.register = !item.register;
     if (!item.register) {
       item.level = 1;
@@ -325,6 +372,10 @@ function createCard(item) {
     }
     saveState();
     render();
+    if (wasNotRegistered && item.register) {
+      const cardEl = document.querySelector(`[data-id="${item.id}"]`);
+      if (cardEl) triggerObtainedAnimation(cardEl);
+    }
   });
   const lostBtn = document.createElement('button');
   lostBtn.className = 'lost-btn';
@@ -387,6 +438,8 @@ function createCard(item) {
           item.register = true;
           saveState();
           render();
+          const newCard = document.querySelector(`[data-id="${item.id}"]`);
+          if (newCard) triggerObtainedAnimation(newCard);
         }
       }
     }, LONG_PRESS_MS);
@@ -434,18 +487,26 @@ document.addEventListener('click', (event) => {
 });
 
 function sortItems(items) {
-  const sorted = [...items];
-  const filteredItems =
-    currentSort === 'registered'
-      ? sorted.filter(item => item.register)
-      : currentSort === 'notRegistered'
-      ? sorted.filter(item => !item.register)
-      : currentSort === 'notDominated'
-      ? sorted.filter(item => !item.dominated)
-      : sorted;
+  let filtered = [...items];
+
+  if (currentSpecialFilter !== 'all') {
+    if (currentSpecialFilter === 'base') {
+      filtered = filtered.filter(item => !item.specialType);
+    } else {
+      filtered = filtered.filter(item => item.specialType?.toLowerCase() === currentSpecialFilter);
+    }
+  }
+
+  const preFiltered = currentSort === 'registered'
+    ? filtered.filter(item => item.register)
+    : currentSort === 'notRegistered'
+    ? filtered.filter(item => !item.register)
+    : currentSort === 'notDominated'
+    ? filtered.filter(item => !item.dominated)
+    : filtered;
 
   if (currentSort === 'rarity') {
-    return filteredItems.sort((a, b) => {
+    return preFiltered.sort((a, b) => {
       const rankA = rarityOrder[a.rarity || 'common'];
       const rankB = rarityOrder[b.rarity || 'common'];
       if (rankA !== rankB) return rankA - rankB;
@@ -454,7 +515,7 @@ function sortItems(items) {
   }
 
   if (currentSort === 'status') {
-    return filteredItems.sort((a, b) => {
+    return preFiltered.sort((a, b) => {
       if (a.dominated === b.dominated) {
         return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
       }
@@ -462,16 +523,7 @@ function sortItems(items) {
     });
   }
 
-  if (currentSort === 'status' || currentSort === 'notDominated') {
-    return filteredItems.sort((a, b) => {
-      if (a.dominated === b.dominated) {
-        return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
-      }
-      return a.dominated ? -1 : 1;
-    });
-  }
-
-  return filteredItems.sort((a, b) => {
+  return preFiltered.sort((a, b) => {
     const baseIdA = String(a.id).split('-')[0];
     const baseIdB = String(b.id).split('-')[0];
     if (baseIdA !== baseIdB) {
@@ -497,6 +549,7 @@ function render() {
   dominatedCountElement.textContent = getDominatedCount();
   totalSpiritsElement.textContent = getTotalCount();
   registeredCountElement.textContent = getRegisteredCount();
+  updateDashboard();
 }
 
 function getItemById(id) {
@@ -506,6 +559,7 @@ function getItemById(id) {
 function updateLevel(id, change) {
   const item = getItemById(id);
   if (!item) return;
+  const wasDominated = item.dominated;
   const nextLevel = Math.min(5, Math.max(1, item.level + change));
   if (item.lost && nextLevel > 1) {
     item.lost = false;
@@ -516,6 +570,10 @@ function updateLevel(id, change) {
   }
   saveState();
   render();
+  if (item.dominated && !wasDominated) {
+    const card = document.querySelector(`[data-id="${id}"]`);
+    if (card) triggerDominatedAnimation(card);
+  }
 }
 
 function resetItem(id) {
@@ -535,6 +593,58 @@ async function resetAll() {
   render();
 }
 
+function updateDashboard() {
+  const all = getAllItems();
+  const registered = all.filter(i => i.register);
+  const dominated = all.filter(i => i.dominated);
+
+  const rarityCounts = {
+    mythic: { total: 0, dominated: 0 },
+    legendary: { total: 0, dominated: 0 },
+    epic: { total: 0, dominated: 0 },
+    rare: { total: 0, dominated: 0 }
+  };
+
+  registered.forEach(item => {
+    if (rarityCounts[item.rarity]) {
+      rarityCounts[item.rarity].total++;
+      if (item.dominated) rarityCounts[item.rarity].dominated++;
+    }
+  });
+
+  const rarityBars = document.querySelectorAll('.rarity-bar-fill');
+  rarityBars.forEach(bar => {
+    const rarity = bar.dataset.rarity;
+    const data = rarityCounts[rarity];
+    const pct = data.total > 0 ? (data.dominated / data.total) * 100 : 0;
+    bar.style.width = `${pct}%`;
+  });
+
+  const rarityCountsEl = document.querySelectorAll('.rarity-count');
+  rarityCountsEl.forEach(el => {
+    const rarity = el.dataset.rarity;
+    const data = rarityCounts[rarity];
+    el.textContent = `${data.dominated}/${data.total}`;
+  });
+
+  document.getElementById('dashboardProgress').style.width = `${all.length > 0 ? (dominated.length / all.length) * 100 : 0}%`;
+  document.getElementById('dashboardProgressText').textContent = `${dominated.length} de ${all.length} dominados`;
+}
+
+function showOnboarding() {
+  const hasSeenOnboarding = localStorage.getItem('espiritus-onboarding-seen');
+  if (!hasSeenOnboarding && currentUser) {
+    onboardingModal.classList.remove('hidden');
+    return true;
+  }
+  return false;
+}
+
+function closeOnboarding() {
+  onboardingModal.classList.add('hidden');
+  localStorage.setItem('espiritus-onboarding-seen', 'true');
+}
+
 resetAllButton.addEventListener('click', () => {
   if (confirm('¿Reiniciar todos los espíritus y variantes a nivel 1?')) {
     resetAll();
@@ -545,9 +655,37 @@ logoutBtn.addEventListener('click', async () => {
   await supabase.auth.signOut();
 });
 
+document.getElementById('onboardingNext')?.addEventListener('click', () => {
+  const activeStep = document.querySelector('.onboarding-step.active');
+  const nextStep = activeStep?.nextElementSibling;
+  if (nextStep && nextStep.classList.contains('onboarding-step')) {
+    activeStep.classList.remove('active');
+    nextStep.classList.add('active');
+  } else {
+    closeOnboarding();
+  }
+});
+
+document.getElementById('onboardingSkip')?.addEventListener('click', closeOnboarding);
+dashboardClose?.addEventListener('click', () => dashboardView.classList.add('hidden'));
+
+document.getElementById('showDashboard')?.addEventListener('click', () => {
+  updateDashboard();
+  dashboardView.classList.remove('hidden');
+});
+
 sortSelect.addEventListener('change', () => {
   currentSort = sortSelect.value;
   render();
+});
+
+specialFilterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    specialFilterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSpecialFilter = btn.dataset.filter;
+    render();
+  });
 });
 
 let isRegisterMode = false;
@@ -618,6 +756,7 @@ async function initAuth() {
     appContent.classList.remove('hidden');
     await loadState();
     render();
+    showOnboarding();
   } else {
     authModal.classList.remove('hidden');
     appContent.classList.add('hidden');
@@ -629,7 +768,10 @@ supabase.auth.onAuthStateChange((_event, session) => {
     currentUser = session.user;
     authModal.classList.add('hidden');
     appContent.classList.remove('hidden');
-    loadState().then(render);
+    loadState().then(() => {
+      render();
+      showOnboarding();
+    });
   } else {
     currentUser = null;
     authModal.classList.remove('hidden');
