@@ -13,7 +13,34 @@
 
 <body>
   <div class="ambient-glow"></div>
-  <main>
+
+  <div id="authModal" class="auth-modal">
+    <div class="auth-container">
+      <h2 class="auth-title">Espíritus</h2>
+      <div id="authTabs" class="auth-tabs">
+        <button id="loginTab" class="auth-tab active">Iniciar Sesión</button>
+        <button id="registerTab" class="auth-tab">Registrarse</button>
+      </div>
+      <form id="authForm" class="auth-form">
+        <div id="emailField" class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" required minlength="6" />
+        </div>
+        <div id="confirmField" class="form-group" style="display: none;">
+          <label for="confirmPassword">Confirmar Contraseña</label>
+          <input type="password" id="confirmPassword" minlength="6" />
+        </div>
+        <button type="submit" id="authSubmit" class="auth-btn">Iniciar Sesión</button>
+        <p id="authError" class="auth-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <main id="appContent" class="hidden">
     <header class="tracker-hud">
       <div class="hud-left">
         <div class="hud-label">SEASON 7 · CHAPTER 3</div>
@@ -49,6 +76,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
           Reiniciar todo
         </button>
+        <button id="logoutBtn" class="btn-reset">Cerrar Sesión</button>
       </div>
     </header>
 
@@ -57,7 +85,7 @@
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 
 </html>

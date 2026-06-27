@@ -1,3 +1,5 @@
+import { supabase } from './supabase.js';
+
 const baseSprites = [
   { id: 1, name: 'Water Sprite', rarity: 'rare', type: 'Elemental', image: 'https://static.wikia.nocookie.net/fortnite/images/a/a4/Water_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20241201124607' },
   { id: 2, name: 'Earth Sprite',  rarity: 'rare', type: 'Elemental', image: 'https://static.wikia.nocookie.net/fortnite/images/c/cf/Earth_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606121336' },
@@ -87,18 +89,28 @@ function getSpecialImageByType(spriteId, type) {
 }
 
 const rarityOrder = { mythic: 0, legendary: 1, epic: 2, rare: 3, common: 4, special: 5 };
-const storageKey = 'fortnite-espiritus-state';
 const gridElement = document.getElementById('spiritGrid');
 const resetAllButton = document.getElementById('resetAll');
+const logoutBtn = document.getElementById('logoutBtn');
 const dominatedCountElement = document.getElementById('dominatedCount');
 const totalSpiritsElement = document.getElementById('totalSpirits');
 const registeredCountElement = document.getElementById('registeredCount');
 const sortSelect = document.getElementById('sortSelect');
+const authModal = document.getElementById('authModal');
+const appContent = document.getElementById('appContent');
+const authForm = document.getElementById('authForm');
+const loginTab = document.getElementById('loginTab');
+const registerTab = document.getElementById('registerTab');
+const emailField = document.getElementById('emailField');
+const confirmField = document.getElementById('confirmField');
+const authSubmit = document.getElementById('authSubmit');
+const authError = document.getElementById('authError');
 
 let spirits = [];
 let specials = [];
 let currentSort = 'default';
 let selectedItemId = null;
+let currentUser = null;
 
 function generateSpecials() {
   return baseSprites
@@ -119,58 +131,66 @@ function generateSpecials() {
     );
 }
 
-function loadState() {
-  const stored = localStorage.getItem(storageKey);
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored);
-      spirits = baseSprites.map((base) => ({
-        ...base,
-        ...parsed.base?.[base.id],
-        level: parsed.base?.[base.id]?.level ?? 1,
-        lost: parsed.base?.[base.id]?.lost ?? false,
-        register: parsed.base?.[base.id]?.register ?? false,
-        dominated: parsed.base?.[base.id]?.dominated ?? false
-      }));
-      specials = generateSpecials().map((item) => ({
-        ...item,
-        ...parsed.special?.[item.id],
-        level: parsed.special?.[item.id]?.level ?? 1,
-        lost: parsed.special?.[item.id]?.lost ?? false,
-        register: parsed.special?.[item.id]?.register ?? false,
-        dominated: parsed.special?.[item.id]?.dominated ?? false
-      }));
-      return;
-    } catch (error) {
-      console.warn('Error al leer estado guardado:', error);
-    }
-  }
-  spirits = baseSprites.map((base) => ({ ...base, level: 1, lost: false, register: false, dominated: false }));
-  specials = generateSpecials();
+function generateAllItems() {
+  return baseSprites.map((base) => ({ ...base, level: 1, lost: false, register: false, dominated: false }));
 }
 
-function saveState() {
-  const payload = {
-    base: spirits.reduce((acc, spirit) => {
-      acc[spirit.id] = {
-        level: spirit.level,
-        lost: spirit.lost,
-        register: spirit.register,
-        dominated: spirit.dominated
-      };
-      return acc;
-    }, {}),
-    special: specials.reduce((acc, spirit) => {
-      acc[spirit.id] = {
-        level: spirit.level,
-        lost: spirit.lost,
-        register: spirit.register,
-        dominated: spirit.dominated
-      };
-      return acc;
-    }, {})
-  };
-  localStorage.setItem(storageKey, JSON.stringify(payload));
+async function loadState() {
+  if (!currentUser) return;
+
+  const { data, error } = await supabase
+    .from('spirit_states')
+    .select('*')
+    .eq('user_id', currentUser.id);
+
+  if (error) {
+    console.warn('Error loading state:', error);
+    spirits = generateAllItems();
+    specials = generateSpecials();
+    return;
+  }
+
+  const stateMap = {};
+  data.forEach(row => {
+    stateMap[row.spirit_id] = row;
+  });
+
+  spirits = baseSprites.map((base) => {
+    const saved = stateMap[`base-${base.id}`];
+    return {
+      ...base,
+      level: saved?.level ?? 1,
+      lost: saved?.lost ?? false,
+      register: saved?.register ?? false,
+      dominated: saved?.dominated ?? false
+    };
+  });
+
+  specials = generateSpecials().map((item) => {
+    const saved = stateMap[item.id];
+    return {
+      ...item,
+      level: saved?.level ?? 1,
+      lost: saved?.lost ?? false,
+      register: saved?.register ?? false,
+      dominated: saved?.dominated ?? false
+    };
+  });
+}
+
+async function saveState() {
+  if (!currentUser) return;
+
+  const states = [...spirits, ...specials].map(item => ({
+    user_id: currentUser.id,
+    spirit_id: item.id,
+    level: item.level,
+    lost: item.lost,
+    register: item.register,
+    dominated: item.dominated
+  }));
+
+  await supabase.from('spirit_states').upsert(states, { onConflict: 'user_id,spirit_id' });
 }
 
 function getDominatedCount() {
@@ -508,10 +528,10 @@ function resetItem(id) {
   render();
 }
 
-function resetAll() {
-  spirits = baseSprites.map((base) => ({ ...base, level: 1, lost: false, register: false, dominated: false }));
+async function resetAll() {
+  spirits = generateAllItems();
   specials = generateSpecials();
-  saveState();
+  await saveState();
   render();
 }
 
@@ -521,10 +541,88 @@ resetAllButton.addEventListener('click', () => {
   }
 });
 
+logoutBtn.addEventListener('click', async () => {
+  await supabase.auth.signOut();
+});
+
 sortSelect.addEventListener('change', () => {
   currentSort = sortSelect.value;
   render();
 });
 
-loadState();
-render();
+let isRegisterMode = false;
+
+loginTab.addEventListener('click', () => {
+  isRegisterMode = false;
+  loginTab.classList.add('active');
+  registerTab.classList.remove('active');
+  confirmField.style.display = 'none';
+  authSubmit.textContent = 'Iniciar Sesión';
+});
+
+registerTab.addEventListener('click', () => {
+  isRegisterMode = true;
+  registerTab.classList.add('active');
+  loginTab.classList.remove('active');
+  confirmField.style.display = 'block';
+  authSubmit.textContent = 'Crear Cuenta';
+});
+
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  authError.textContent = '';
+
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  if (isRegisterMode) {
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    if (password !== confirmPassword) {
+      authError.textContent = 'Las contraseñas no coinciden';
+      return;
+    }
+
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      authError.textContent = error.message;
+    } else {
+      authError.textContent = 'Revisa tu email para confirmar la cuenta';
+      authError.style.color = '#4ade80';
+    }
+  } else {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      authError.textContent = error.message;
+    }
+  }
+});
+
+async function initAuth() {
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (session?.user) {
+    currentUser = session.user;
+    authModal.classList.add('hidden');
+    appContent.classList.remove('hidden');
+    await loadState();
+    render();
+  } else {
+    authModal.classList.remove('hidden');
+    appContent.classList.add('hidden');
+  }
+}
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    authModal.classList.add('hidden');
+    appContent.classList.remove('hidden');
+    loadState().then(render);
+  } else {
+    currentUser = null;
+    authModal.classList.remove('hidden');
+    appContent.classList.add('hidden');
+  }
+});
+
+initAuth();
