@@ -571,9 +571,17 @@ registerTab.addEventListener('click', () => {
 authForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   authError.textContent = '';
+  authError.style.color = '#ff6b35';
 
-  const email = document.getElementById('email').value;
+  const emailInput = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
+
+  if (!emailInput || password.length < 6) {
+    authError.textContent = 'El usuario y contraseña son obligatorios';
+    return;
+  }
+
+  const fakeEmail = emailInput.includes('@') ? emailInput : `${emailInput}@espiritus.app`;
 
   if (isRegisterMode) {
     const confirmPassword = document.getElementById('confirmPassword').value;
@@ -582,17 +590,21 @@ authForm.addEventListener('submit', async (e) => {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({ email: fakeEmail, password });
     if (error) {
       authError.textContent = error.message;
     } else {
-      authError.textContent = 'Revisa tu email para confirmar la cuenta';
+      authError.textContent = 'Cuenta creada. Ya puedes iniciar sesión.';
       authError.style.color = '#4ade80';
+      setTimeout(() => {
+        loginTab.click();
+        document.getElementById('email').value = emailInput;
+      }, 1500);
     }
   } else {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email: fakeEmail, password });
     if (error) {
-      authError.textContent = error.message;
+      authError.textContent = 'Usuario o contraseña incorrectos';
     }
   }
 });
