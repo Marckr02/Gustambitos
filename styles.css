@@ -265,6 +265,16 @@ main {
   transform: translateY(-3px);
 }
 
+.card:hover .spirit-image-frame img {
+  filter: brightness(1.2) saturate(1.15);
+  transform: scale(1.06);
+  transform-origin: center center;
+}
+
+.card:hover .scanner-line {
+  animation: scannerSweep 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 .card:hover::before {
   opacity: 1;
 }
@@ -321,25 +331,49 @@ main {
 
 .badge {
   font-family: 'Exo 2', sans-serif;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  padding: 4px 9px;
+  padding: 5px 8px 3px;
   border-radius: 6px;
   line-height: 1;
+  min-width: 54px;
+  text-align: center;
 }
 
-.badge.common { background: rgba(136, 144, 168, 0.15); color: #8890a8; }
-.badge.rare { background: rgba(92, 170, 255, 0.15); color: #5caaff; }
-.badge.epic { background: rgba(179, 102, 255, 0.15); color: #b366ff; }
-.badge.legendary { background: rgba(255, 179, 71, 0.15); color: #ffb347; }
-.badge.mythic { background: rgba(255, 92, 200, 0.15); color: #ff5cc8; }
+.badge.common { background: rgb(64, 70, 77); color: rgb(183, 191, 197); }
+.badge.rare { background: rgb(0, 69, 138); color: rgb(0, 255, 251); }
+.badge.epic { background: rgb(76, 25, 123); color: rgb(236, 39, 255); }
+.badge.legendary { background: rgb(138, 60, 30); color: rgb(251, 195, 99); }
+.badge.mythic { background: rgb(124, 93, 38); color: rgb(255, 240, 166); }
 
-.badge.special-gold { background: rgba(255, 217, 61, 0.15); color: #ffd93d; border: 1px solid rgba(255, 217, 61, 0.25); }
-.badge.special-gummy { background: rgba(255, 110, 180, 0.15); color: #ff6eb4; border: 1px solid rgba(255, 110, 180, 0.25); }
-.badge.special-galaxy { background: rgba(157, 92, 255, 0.15); color: #9d5cff; border: 1px solid rgba(157, 92, 255, 0.25); }
-.badge.special-special { background: linear-gradient(135deg, rgba(255,110,180,0.15), rgba(0,217,255,0.15), rgba(255,217,61,0.15)); color: #fff; border: 1px solid rgba(255,255,255,0.15); }
+.badge.special-gold { background: linear-gradient(135deg, rgb(255, 215, 0), rgb(218, 165, 32)); color: rgb(0, 0, 0); }
+.badge.special-gummy { background: linear-gradient(135deg, rgb(255, 105, 180), rgb(255, 20, 147)); color: rgb(255, 255, 255); }
+.badge.special-galaxy { background: linear-gradient(135deg, rgb(138, 43, 226), rgb(75, 0, 130)); color: rgb(255, 255, 255); }
+.badge.special-special { background: linear-gradient(135deg, rgba(255,110,180,0.8), rgba(0,217,255,0.8), rgba(255,217,61,0.8)); color: rgb(0, 0, 0); animation: specialGradient 3s ease infinite; background-size: 200% 200%; }
+
+@keyframes specialGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.spirit-drop-rate {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 6px 2px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgb(185, 187, 190);
+}
+
+.spirit-drop-rate.rare { background: rgba(0, 69, 138, 0.6); color: rgb(0, 255, 251); }
+.spirit-drop-rate.epic { background: rgba(76, 25, 123, 0.6); color: rgb(236, 39, 255); }
+.spirit-drop-rate.legendary { background: rgba(138, 60, 30, 0.6); color: rgb(251, 195, 99); }
+.spirit-drop-rate.mythic { background: rgba(124, 93, 38, 0.6); color: rgb(255, 240, 166); }
 
 .crown {
   font-size: 1rem;
@@ -368,7 +402,7 @@ main {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: filter 0.3s;
+  transition: filter 0.32s, transform 0.32s cubic-bezier(0.34, 3.85, 0.64, 1);
   -webkit-touch-callout: none;
   touch-callout: none;
   -webkit-user-select: none;
