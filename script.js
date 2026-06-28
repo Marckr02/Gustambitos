@@ -109,6 +109,10 @@ const onboardingModal = document.getElementById('onboardingModal');
 const dashboardView = document.getElementById('dashboardView');
 const dashboardClose = document.getElementById('dashboardClose');
 const specialFilterBtns = document.querySelectorAll('.special-filter-btn');
+const appLoading = document.getElementById('appLoading');
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+const emptyState = document.getElementById('emptyState');
 
 let spirits = [];
 let specials = [];
@@ -117,6 +121,7 @@ let currentSpecialFilter = 'all';
 let selectedItemId = null;
 let currentUser = null;
 let saveTimeout = null;
+let searchQuery = '';
 
 const specialDropRates = {
   gold: { mythic: 0.0000012, legendary: 0.03, epic: 0.07, rare: 0.17 },
@@ -522,6 +527,15 @@ function sortItems(items) {
     }
   }
 
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase().trim();
+    filtered = filtered.filter(item =>
+      item.name.toLowerCase().includes(query) ||
+      item.type.toLowerCase().includes(query) ||
+      (item.specialType && item.specialType.toLowerCase().includes(query))
+    );
+  }
+
   const preFiltered = currentSort === 'registered'
     ? filtered.filter(item => item.register)
     : currentSort === 'notRegistered'
@@ -570,11 +584,18 @@ function getAllItems() {
 function render() {
   gridElement.innerHTML = '';
   sortSelect.value = currentSort;
-  sortItems(getAllItems()).forEach((item) => gridElement.appendChild(createCard(item)));
+  const items = sortItems(getAllItems());
+  items.forEach((item) => gridElement.appendChild(createCard(item)));
   dominatedCountElement.textContent = getDominatedCount();
   totalSpiritsElement.textContent = getTotalCount();
   registeredCountElement.textContent = getRegisteredCount();
   updateDashboard();
+
+  if (items.length === 0 && (searchQuery || currentSpecialFilter !== 'all')) {
+    emptyState.classList.remove('hidden');
+  } else {
+    emptyState.classList.add('hidden');
+  }
 }
 
 function getItemById(id) {
@@ -713,6 +734,87 @@ specialFilterBtns.forEach(btn => {
   });
 });
 
+function performSearch(query) {
+  searchQuery = query;
+  render();
+}
+
+function showSearchSuggestions(query) {
+  if (!query.trim()) {
+    searchResults.classList.add('hidden');
+    return;
+  }
+
+  const allItems = getAllItems();
+  const q = query.toLowerCase();
+  const matches = allItems.filter(item =>
+    item.name.toLowerCase().includes(q) ||
+    item.type.toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  if (matches.length === 0) {
+    searchResults.classList.add('hidden');
+    return;
+  }
+
+  searchResults.innerHTML = matches.map(item => `
+    <div class="search-result-item" data-id="${item.id}">
+      <img class="search-result-img" src="${item.image}" alt="${item.name}" loading="lazy" />
+      <div class="search-result-info">
+        <div class="search-result-name">${item.name}</div>
+        <div class="search-result-type">${item.specialType || item.type}</div>
+      </div>
+    </div>
+  `).join('');
+
+  searchResults.classList.remove('hidden');
+
+  searchResults.querySelectorAll('.search-result-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.id;
+      searchInput.value = '';
+      searchResults.classList.add('hidden');
+      searchQuery = '';
+      selectedItemId = id;
+      render();
+      setTimeout(() => {
+        const card = document.querySelector(`[data-id="${id}"]`);
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    });
+  });
+}
+
+let searchTimeout;
+searchInput.addEventListener('input', (e) => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    showSearchSuggestions(e.target.value);
+    performSearch(e.target.value);
+  }, 150);
+});
+
+searchInput.addEventListener('focus', () => {
+  if (searchInput.value.trim()) {
+    showSearchSuggestions(searchInput.value);
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-container')) {
+    searchResults.classList.add('hidden');
+  }
+});
+
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    searchInput.value = '';
+    searchQuery = '';
+    searchResults.classList.add('hidden');
+    render();
+  }
+});
+
 let isRegisterMode = false;
 
 loginTab.addEventListener('click', () => {
@@ -773,16 +875,19 @@ authForm.addEventListener('submit', async (e) => {
 });
 
 async function initAuth() {
+  appLoading.classList.remove('hidden');
   const { data: { session } } = await supabase.auth.getSession();
 
   if (session?.user) {
     currentUser = session.user;
     authModal.classList.add('hidden');
-    appContent.classList.remove('hidden');
     await loadState();
+    appContent.classList.remove('hidden');
+    appLoading.classList.add('hidden');
     render();
     showOnboarding();
   } else {
+    appLoading.classList.add('hidden');
     authModal.classList.remove('hidden');
     appContent.classList.add('hidden');
   }
@@ -792,13 +897,15 @@ supabase.auth.onAuthStateChange((_event, session) => {
   if (session?.user) {
     currentUser = session.user;
     authModal.classList.add('hidden');
-    appContent.classList.remove('hidden');
     loadState().then(() => {
+      appContent.classList.remove('hidden');
+      appLoading.classList.add('hidden');
       render();
       showOnboarding();
     });
   } else {
     currentUser = null;
+    appLoading.classList.add('hidden');
     authModal.classList.remove('hidden');
     appContent.classList.add('hidden');
   }

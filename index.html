@@ -104,6 +104,13 @@
     </div>
   </div>
 
+  <div id="appLoading" class="app-loading">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <p> Cargando espíritus...</p>
+    </div>
+  </div>
+
   <main id="appContent" class="hidden">
     <header class="tracker-hud">
       <div class="hud-left">
@@ -129,6 +136,10 @@
         </button>
       </div>
       <div class="hud-controls">
+        <div class="search-container">
+          <input type="text" id="searchInput" class="search-input" placeholder="Buscar espíritu..." />
+          <div id="searchResults" class="search-results hidden"></div>
+        </div>
         <div class="special-filters">
           <button class="special-filter-btn active" data-filter="all">Todos</button>
           <button class="special-filter-btn" data-filter="base">Base</button>
@@ -154,6 +165,17 @@
         <button id="logoutBtn" class="btn-reset">Cerrar Sesión</button>
       </div>
     </header>
+
+    <div id="emptyState" class="empty-state hidden">
+      <div class="empty-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </div>
+      <h3>Sin resultados</h3>
+      <p>No se encontraron espíritus con ese nombre</p>
+    </div>
 
     <section class="containment-grid">
       <div id="spiritGrid" class="grid"></div>
