@@ -113,6 +113,8 @@ const appLoading = document.getElementById('appLoading');
 const searchInput = document.getElementById('searchInput');
 const searchResults = document.getElementById('searchResults');
 const emptyState = document.getElementById('emptyState');
+const downloadCollectionBtn = document.getElementById('downloadCollection');
+const collectionPoster = document.getElementById('collectionPoster');
 
 let spirits = [];
 let specials = [];
@@ -912,3 +914,98 @@ supabase.auth.onAuthStateChange((_event, session) => {
 });
 
 initAuth();
+
+downloadCollectionBtn?.addEventListener('click', async () => {
+  downloadCollectionBtn.disabled = true;
+  downloadCollectionBtn.textContent = 'Generando...';
+
+  renderCollectionPoster();
+
+  setTimeout(async () => {
+    try {
+      const canvas = await html2canvas(collectionPoster, {
+        backgroundColor: '#0D0D0D',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      });
+
+      const link = document.createElement('a');
+      link.download = `mi-coleccion-${new Date().toISOString().split('T')[0]}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error('Error generando imagen:', err);
+      alert('Error al generar la imagen. Intenta de nuevo.');
+    }
+
+    collectionPoster.classList.add('hidden');
+    collectionPoster.innerHTML = '';
+    downloadCollectionBtn.disabled = false;
+    downloadCollectionBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Colección`;
+  }, 100);
+});
+
+function renderCollectionPoster() {
+  const dominatedCount = getDominatedCount();
+  const registeredCount = getRegisteredCount();
+  const totalCount = getTotalCount();
+
+  collectionPoster.innerHTML = `
+    <div class="poster-header">
+      <div class="poster-title">Mi Colección</div>
+      <div class="poster-stats">
+        <div class="poster-stat">
+          <div class="poster-stat-value">${dominatedCount}</div>
+          <div class="poster-stat-label">Dominados</div>
+        </div>
+        <div class="poster-stat">
+          <div class="poster-stat-value">${registeredCount}</div>
+          <div class="poster-stat-label">Obtenidos</div>
+        </div>
+        <div class="poster-stat">
+          <div class="poster-stat-value">${totalCount}</div>
+          <div class="poster-stat-label">Total</div>
+        </div>
+      </div>
+    </div>
+    <div class="poster-grid">
+      ${baseSprites.map((base, idx) => {
+        const baseSpirit = spirits.find(s => s.id === base.id) || { register: false, dominated: false };
+        const goldSpirit = specials.find(s => s.id === `${base.id}-gold`) || { register: false, dominated: false };
+        const gummySpirit = specials.find(s => s.id === `${base.id}-gummy`) || { register: false, dominated: false };
+        const galaxySpirit = specials.find(s => s.id === `${base.id}-galaxy`) || { register: false, dominated: false };
+
+        return `
+          <div class="poster-row">
+            <span class="poster-label">${String(idx + 1).padStart(2, '0')}</span>
+            <div class="poster-sprite ${!baseSpirit.register ? 'not-collected' : ''} ${baseSpirit.dominated ? 'dominated' : ''}">
+              <img src="${base.image}" alt="${base.name}" crossorigin="anonymous" />
+            </div>
+            <span class="poster-name">${base.name.replace(/ Sprite$/, '')}</span>
+            <div class="poster-variant-group">
+              <div class="poster-sprite ${!baseSpirit.register ? 'not-collected' : ''} ${baseSpirit.dominated ? 'dominated' : ''}">
+                <img src="${base.image}" alt="Base" crossorigin="anonymous" />
+              </div>
+              <div class="poster-sprite ${!goldSpirit.register ? 'not-collected' : ''} ${goldSpirit.dominated ? 'dominated' : ''}">
+                <img src="${specialTypeImages.gold[base.id] || base.image}" alt="Gold" crossorigin="anonymous" />
+              </div>
+              <div class="poster-sprite ${!gummySpirit.register ? 'not-collected' : ''} ${gummySpirit.dominated ? 'dominated' : ''}">
+                <img src="${specialTypeImages.gummy[base.id] || base.image}" alt="Gummy" crossorigin="anonymous" />
+              </div>
+              <div class="poster-sprite ${!galaxySpirit.register ? 'not-collected' : ''} ${galaxySpirit.dominated ? 'dominated' : ''}">
+                <img src="${specialTypeImages.galaxy[base.id] || base.image}" alt="Galaxy" crossorigin="anonymous" />
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div class="poster-footer">
+      Generado con Control de Espíritus · ${new Date().toLocaleDateString('es-ES')}
+    </div>
+  `;
+
+  collectionPoster.classList.remove('hidden');
+}
