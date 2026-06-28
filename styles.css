@@ -248,6 +248,8 @@ main {
   cursor: pointer;
   overflow: hidden;
   transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.18s, box-shadow 0.18s;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
 }
 
 .card::before {
@@ -395,6 +397,7 @@ main {
   overflow: hidden;
   background: var(--surface-bright);
   border: 1px solid var(--surface-border);
+  touch-action: manipulation;
 }
 
 .spirit-image-frame img {
@@ -407,6 +410,8 @@ main {
   touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+  pointer-events: none;
+  touch-action: manipulation;
 }
 
 .spirit-image-frame::after {
