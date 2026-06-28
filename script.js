@@ -115,6 +115,11 @@ const searchResults = document.getElementById('searchResults');
 const emptyState = document.getElementById('emptyState');
 const downloadCollectionBtn = document.getElementById('downloadCollection');
 const collectionPoster = document.getElementById('collectionPoster');
+const previewModal = document.getElementById('previewModal');
+const previewContent = document.getElementById('previewContent');
+const previewClose = document.getElementById('previewClose');
+const previewCancel = document.getElementById('previewCancel');
+const previewDownload = document.getElementById('previewDownload');
 
 let spirits = [];
 let specials = [];
@@ -915,42 +920,72 @@ supabase.auth.onAuthStateChange((_event, session) => {
 
 initAuth();
 
-downloadCollectionBtn?.addEventListener('click', async () => {
-  downloadCollectionBtn.disabled = true;
-  downloadCollectionBtn.textContent = 'Generando...';
-
-  renderCollectionPoster();
-
-  setTimeout(async () => {
-    try {
-      const canvas = await html2canvas(collectionPoster, {
-        backgroundColor: '#0D0D0D',
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false
-      });
-
-      const link = document.createElement('a');
-      link.download = `mi-coleccion-${new Date().toISOString().split('T')[0]}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    } catch (err) {
-      console.error('Error generando imagen:', err);
-      alert('Error al generar la imagen. Intenta de nuevo.');
-    }
-
-    collectionPoster.classList.add('hidden');
-    collectionPoster.innerHTML = '';
-    downloadCollectionBtn.disabled = false;
-    downloadCollectionBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Colección`;
-  }, 100);
+downloadCollectionBtn?.addEventListener('click', () => {
+  renderCollectionPoster(true);
+  setTimeout(() => {
+    previewModal.classList.remove('hidden');
+  }, 50);
 });
 
-function renderCollectionPoster() {
+function closePreview() {
+  previewModal.classList.add('hidden');
+  setTimeout(() => {
+    collectionPoster.innerHTML = '';
+    collectionPoster.classList.add('hidden');
+  }, 300);
+}
+
+previewClose?.addEventListener('click', closePreview);
+previewCancel?.addEventListener('click', closePreview);
+
+previewDownload?.addEventListener('click', async () => {
+  previewDownload.disabled = true;
+  previewDownload.textContent = 'Generando...';
+
+  try {
+    const canvas = await html2canvas(collectionPoster, {
+      backgroundColor: '#F8F6F1',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      logging: false
+    });
+
+    const link = document.createElement('a');
+    link.download = `mi-coleccion-${new Date().toISOString().split('T')[0]}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (err) {
+    console.error('Error generando imagen:', err);
+    alert('Error al generar la imagen. Intenta de nuevo.');
+  }
+
+  previewDownload.disabled = false;
+  previewDownload.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar PNG`;
+  closePreview();
+});
+
+function getVariantImage(spriteId, variant) {
+  const url = specialTypeImages[variant]?.[spriteId];
+  return url || '';
+}
+
+function renderCollectionPoster(forPreview = false) {
   const dominatedCount = getDominatedCount();
   const registeredCount = getRegisteredCount();
   const totalCount = getTotalCount();
+
+  if (forPreview) {
+    collectionPoster.classList.remove('hidden');
+    collectionPoster.style.position = '';
+    collectionPoster.style.top = '';
+    collectionPoster.style.left = '';
+  } else {
+    collectionPoster.classList.remove('hidden');
+    collectionPoster.style.position = 'fixed';
+    collectionPoster.style.top = '-9999px';
+    collectionPoster.style.left = '-9999px';
+  }
 
   collectionPoster.innerHTML = `
     <div class="poster-header">
@@ -971,32 +1006,44 @@ function renderCollectionPoster() {
       </div>
     </div>
     <div class="poster-grid">
-      ${baseSprites.map((base, idx) => {
+      ${baseSprites.map(base => {
         const baseSpirit = spirits.find(s => s.id === base.id) || { register: false, dominated: false };
         const goldSpirit = specials.find(s => s.id === `${base.id}-gold`) || { register: false, dominated: false };
         const gummySpirit = specials.find(s => s.id === `${base.id}-gummy`) || { register: false, dominated: false };
         const galaxySpirit = specials.find(s => s.id === `${base.id}-galaxy`) || { register: false, dominated: false };
 
+        const variants = [
+          { key: 'base', spirit: baseSpirit, img: base.image, label: 'Base' },
+          { key: 'gold', spirit: goldSpirit, img: getVariantImage(base.id, 'gold'), label: 'Gold' },
+          { key: 'gummy', spirit: gummySpirit, img: getVariantImage(base.id, 'gummy'), label: 'Gummy' },
+          { key: 'galaxy', spirit: galaxySpirit, img: getVariantImage(base.id, 'galaxy'), label: 'Galaxy' }
+        ];
+
+        const dominatedAll = variants.every(v => v.spirit.dominated);
+        const registeredAll = variants.every(v => v.spirit.register);
+
         return `
-          <div class="poster-row">
-            <span class="poster-label">${String(idx + 1).padStart(2, '0')}</span>
-            <div class="poster-sprite ${!baseSpirit.register ? 'not-collected' : ''} ${baseSpirit.dominated ? 'dominated' : ''}">
-              <img src="${base.image}" alt="${base.name}" crossorigin="anonymous" />
+          <div class="poster-group">
+            <div class="poster-name-col">
+              <div class="poster-name">${base.name.replace(/ Sprite$/, '')}</div>
+              <div class="poster-badges">
+                ${variants.map(v => `
+                  <span class="poster-badge ${v.key}" title="${v.label}">${v.label.charAt(0)}</span>
+                `).join('')}
+              </div>
             </div>
-            <span class="poster-name">${base.name.replace(/ Sprite$/, '')}</span>
             <div class="poster-variant-group">
-              <div class="poster-sprite ${!baseSpirit.register ? 'not-collected' : ''} ${baseSpirit.dominated ? 'dominated' : ''}">
-                <img src="${base.image}" alt="Base" crossorigin="anonymous" />
-              </div>
-              <div class="poster-sprite ${!goldSpirit.register ? 'not-collected' : ''} ${goldSpirit.dominated ? 'dominated' : ''}">
-                <img src="${specialTypeImages.gold[base.id] || base.image}" alt="Gold" crossorigin="anonymous" />
-              </div>
-              <div class="poster-sprite ${!gummySpirit.register ? 'not-collected' : ''} ${gummySpirit.dominated ? 'dominated' : ''}">
-                <img src="${specialTypeImages.gummy[base.id] || base.image}" alt="Gummy" crossorigin="anonymous" />
-              </div>
-              <div class="poster-sprite ${!galaxySpirit.register ? 'not-collected' : ''} ${galaxySpirit.dominated ? 'dominated' : ''}">
-                <img src="${specialTypeImages.galaxy[base.id] || base.image}" alt="Galaxy" crossorigin="anonymous" />
-              </div>
+              ${variants.map(v => {
+                const isNotCollected = !v.spirit.register;
+                const isDominated = v.spirit.dominated;
+                const missingImage = !v.img;
+                const imgSrc = missingImage ? 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' : v.img;
+                return `
+                  <div class="poster-sprite ${isNotCollected ? 'not-collected' : ''} ${isDominated ? 'dominated' : ''}">
+                    ${missingImage ? '' : `<img src="${imgSrc}" alt="${v.label}" crossorigin="anonymous" />`}
+                  </div>
+                `;
+              }).join('')}
             </div>
           </div>
         `;
@@ -1006,6 +1053,4 @@ function renderCollectionPoster() {
       Generado con Control de Espíritus · ${new Date().toLocaleDateString('es-ES')}
     </div>
   `;
-
-  collectionPoster.classList.remove('hidden');
 }
