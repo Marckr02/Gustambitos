@@ -407,7 +407,6 @@ main {
   display: block;
   transition: filter 0.32s, transform 0.32s cubic-bezier(0.34, 3.85, 0.64, 1);
   -webkit-touch-callout: none;
-  touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
   pointer-events: none;

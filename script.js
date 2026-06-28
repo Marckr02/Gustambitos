@@ -232,7 +232,7 @@ async function saveState() {
   saveTimeout = setTimeout(async () => {
     const states = [...spirits, ...specials].map(item => ({
       user_id: currentUser.id,
-      spirit_id: item.id,
+      spirit_id: item.specialType ? item.id : `base-${item.id}`,
       level: item.level,
       lost: item.lost,
       register: item.register,
