@@ -469,8 +469,78 @@ function createCard(item) {
           render();
           const newCard = document.querySelector(`[data-id="${item.id}"]`);
           if (newCard) triggerObtainedAnimation(newCard);
-        }
-      }
+}
+}
+
+function renderCollectionPosterHTML() {
+  const dominatedCount = getDominatedCount();
+  const registeredCount = getRegisteredCount();
+  const totalCount = getTotalCount();
+
+  collectionPoster.classList.remove('hidden');
+  collectionPoster.style.position = 'fixed';
+  collectionPoster.style.top = '-9999px';
+  collectionPoster.style.left = '-9999px';
+
+  collectionPoster.innerHTML = `
+    <div style="width:900px;background:#F8F6F1;padding:40px;font-family:'Fredoka',sans-serif;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:2px solid #D4CFC6;">
+        <div style="font-family:'Exo 2',sans-serif;font-size:1.8rem;font-weight:700;color:#1A1A1A;text-transform:uppercase;">Mi Colección</div>
+        <div style="display:flex;gap:20px;">
+          <div style="text-align:center;">
+            <div style="font-size:1.4rem;font-weight:700;color:#1A1A1A;">${dominatedCount}</div>
+            <div style="font-size:0.7rem;color:#7A756E;text-transform:uppercase;">Dominados</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:1.4rem;font-weight:700;color:#1A1A1A;">${registeredCount}</div>
+            <div style="font-size:0.7rem;color:#7A756E;text-transform:uppercase;">Obtenidos</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:1.4rem;font-weight:700;color:#1A1A1A;">${totalCount}</div>
+            <div style="font-size:0.7rem;color:#7A756E;text-transform:uppercase;">Total</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 32px;">
+        ${baseSprites.map((base, idx) => {
+          const baseSpirit = spirits.find(s => s.id === base.id) || { register: false, dominated: false };
+          const goldSpirit = specials.find(s => s.id === `${base.id}-gold`) || { register: false, dominated: false };
+          const gummySpirit = specials.find(s => s.id === `${base.id}-gummy`) || { register: false, dominated: false };
+          const galaxySpirit = specials.find(s => s.id === `${base.id}-galaxy`) || { register: false, dominated: false };
+
+          const variants = [
+            { spirit: baseSpirit, img: base.image, color: '#C0C0C0' },
+            { spirit: goldSpirit, img: getVariantImage(base.id, 'gold') || base.image, color: '#F0D060' },
+            { spirit: gummySpirit, img: getVariantImage(base.id, 'gummy') || base.image, color: '#F5A0D0' },
+            { spirit: galaxySpirit, img: getVariantImage(base.id, 'galaxy') || base.image, color: '#B090F0' }
+          ];
+
+          return `
+            <div style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,0.7);border-radius:12px;border:1px solid #D4CFC6;">
+              <div style="flex:1;">
+                <div style="font-size:0.8rem;font-weight:600;color:${baseSpirit.dominated ? '#C9A227' : '#1A1A1A'};">${base.name}</div>
+              </div>
+              <div style="display:flex;gap:5px;">
+                ${variants.map(v => {
+                  const notCollected = !v.spirit.register;
+                  const dominated = v.spirit.dominated;
+                  return `
+                    <div style="width:52px;height:52px;border-radius:8px;background:#FFF;border:2px solid ${dominated ? '#C9A227' : '#D4CFC6'};${notCollected ? 'filter:grayscale(1) opacity(0.4);' : ''}overflow:hidden;${dominated ? 'box-shadow:0 0 10px rgba(201,162,39,0.4);' : ''}">
+                      <img src="${v.img}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <div style="margin-top:24px;padding-top:16px;border-top:2px solid #D4CFC6;text-align:center;font-size:0.7rem;color:#7A756E;">
+        Generado con Control de Espíritus · ${new Date().toLocaleDateString('es-ES')}
+      </div>
+    </div>
+  `;
+}
     }, LONG_PRESS_MS);
   };
 
@@ -916,17 +986,13 @@ downloadCollectionBtn?.addEventListener('click', () => {
   downloadCollectionBtn.disabled = true;
   downloadCollectionBtn.textContent = 'Generando...';
 
+  renderCollectionPosterHTML();
   closePreview();
 
   setTimeout(() => {
     previewModal.classList.remove('hidden');
-    previewContent.innerHTML = '<div class="poster-preview-loading">Generando vista previa...</div>';
-
-    setTimeout(() => {
-      previewContent.innerHTML = '<div class="poster-preview-text">Colección lista para descargar</div>';
-      downloadCollectionBtn.disabled = false;
-      downloadCollectionBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Colección`;
-    }, 500);
+    downloadCollectionBtn.disabled = false;
+    downloadCollectionBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Colección`;
   }, 50);
 });
 
@@ -945,7 +1011,14 @@ previewDownload?.addEventListener('click', async () => {
   previewDownload.textContent = 'Generando...';
 
   try {
-    const canvas = await generatePosterCanvas();
+    const canvas = await html2canvas(collectionPoster, {
+      backgroundColor: '#F8F6F1',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      logging: false
+    });
+
     const link = document.createElement('a');
     link.download = `mi-coleccion-${new Date().toISOString().split('T')[0]}.png`;
     link.href = canvas.toDataURL('image/png');
