@@ -12,13 +12,13 @@ const baseSprites = [
   { id: 9, name: 'Dream Sprite',  rarity: 'legendary', type: 'Dream', image: 'https://static.wikia.nocookie.net/fortnite/images/9/99/Dream_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606121205', dropRate: 2.63 },
   { id: 10, name: 'Zero Point Sprite',  rarity: 'mythic', type: 'Cosmic', image: 'https://static.wikia.nocookie.net/fortnite/images/a/a4/Zero_Point_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120116', dropRate: 0.000098 },
   { id: 11, name: 'Burnt Peanut',  rarity: 'mythic', type: 'Mythic', image: 'https://static.wikia.nocookie.net/fortnite/images/0/0b/Burnt_Peanut_-_Item_-_Fortnite.png/revision/latest?cb=20260606183106', dropRate: 1.01 },
-  { id: 12, name: 'Fishy Sprite',  rarity: 'rare', type: 'Fish', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fishy_ui_L.webp', dropRate: 13.79 },
-  { id: 13, name: 'Striker Sprite',  rarity: 'epic', type: 'Strike', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Soccer_ui_L.webp', dropRate: 5.74 },
-  { id: 14, name: 'Aura Sprite',  rarity: 'epic', type: 'Aura', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_ui_L.webp', dropRate: 5.74 },
-  { id: 15, name: 'Boss Sprite',  rarity: 'legendary', type: 'Boss', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Boss_ui_L.webp', dropRate: 2.63 },
-  { id: 16, name: 'Grim Reaper Sprite',  rarity: 'mythic', type: 'Reaper', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_GrimReaper_Default_L.webp', dropRate: 0.000098 },
-  { id: 17, name: 'Aire Sprite',  rarity: 'rare', type: 'Elemental', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Air_Default_L.webp', dropRate: 12.45 },
-  { id: 18, name: 'Seven Sprite',  rarity: 'legendary', type: 'Foundacion', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_ui_L.webp', dropRate: 12.45 }
+  { id: 12, name: 'Fishy Sprite',  rarity: 'rare', type: 'Fish', image: 'https://static.wikia.nocookie.net/fortnite/images/e/e3/Fishy_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120707', dropRate: 13.79 },
+  { id: 13, name: 'Striker Sprite',  rarity: 'epic', type: 'Strike', image: 'https://static.wikia.nocookie.net/fortnite/images/3/33/Striker_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120757', dropRate: 5.74 },
+  { id: 14, name: 'Aura Sprite',  rarity: 'epic', type: 'Aura', image: 'https://static.wikia.nocookie.net/fortnite/images/6/6f/Aura_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120537', dropRate: 5.74 },
+  { id: 15, name: 'Boss Sprite',  rarity: 'legendary', type: 'Boss', image: 'https://static.wikia.nocookie.net/fortnite/images/e/ee/Boss_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120557', dropRate: 2.63 },
+  { id: 16, name: 'Grim Reaper Sprite',  rarity: 'mythic', type: 'Reaper', image: 'https://static.wikia.nocookie.net/fortnite/images/1/15/Grim_Reaper_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120636', dropRate: 0.000098 },
+  { id: 17, name: 'Aire Sprite',  rarity: 'rare', type: 'Elemental', image: 'https://static.wikia.nocookie.net/fortnite/images/c/c8/Aire_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120433', dropRate: 12.45 },
+  { id: 18, name: 'Seven Sprite',  rarity: 'legendary', type: 'Foundacion', image: 'https://static.wikia.nocookie.net/fortnite/images/d/d1/Seven_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120241', dropRate: 12.45 }
 ];
 
 const specialTypes = ['Gold', 'Gummy', 'Galaxy'];
@@ -36,13 +36,13 @@ const specialTypeImages = {
     8: 'https://static.wikia.nocookie.net/fortnite/images/5/52/Gold_Punk_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185046',
     9: 'https://static.wikia.nocookie.net/fortnite/images/6/6e/Gold_Dream_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185045',
     10:'https://static.wikia.nocookie.net/fortnite/images/9/95/Gold_Zero_Point_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185046',
-    12:'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fishy_Gold_ui_L.webp',
-    13:'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Soccer_Gold_L.webp',
-    14:'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_Gold_ui_L.webp',
-    15:'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Boss_Gold_ui_L.webp',
-    16:'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_GrimReaper_Gold_L.webp',
-    17:'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Air_Gold_L.webp',
-    18:'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_Gold_ui_L.webp'
+    12:'https://static.wikia.nocookie.net/fortnite/images/9/9f/Gold_Fishy_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183830',
+    13:'https://static.wikia.nocookie.net/fortnite/images/b/b9/Gold_Striker_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183929',
+    14:'https://static.wikia.nocookie.net/fortnite/images/d/d3/Gold_Aura_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183531',
+    15:'https://static.wikia.nocookie.net/fortnite/images/1/14/Gold_Boss_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183258',
+    16:'https://static.wikia.nocookie.net/fortnite/images/5/53/Gold_Grim_Reaper_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183502',
+    17:'https://static.wikia.nocookie.net/fortnite/images/b/b8/Gold_Aire_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183820',
+    18:'https://static.wikia.nocookie.net/fortnite/images/a/a1/Gold_Seven_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183950'
   },
   gummy: {
     1: 'https://static.wikia.nocookie.net/fortnite/images/7/7b/Gummy_Water_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185046',
@@ -55,32 +55,32 @@ const specialTypeImages = {
     8: 'https://static.wikia.nocookie.net/fortnite/images/5/5c/Gummy_Punk_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185046',
     9: 'https://static.wikia.nocookie.net/fortnite/images/d/dc/Gummy_Dream_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185046',
     10:'https://static.wikia.nocookie.net/fortnite/images/1/14/Gummy_Zero_Point_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185046',
-    12: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fishy_Candy_ui_L.webp',
-    13: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Soccer_Candy_L.webp',
-    14: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_Candy_ui_L.webp',
-    15: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Boss_Candy_ui_L.webp',
-    16: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_GrimReaper_Candy_L.webp',
-    17: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Air_Candy_L.webp',
-    18: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_Candy_ui_L.webp'
+    12: 'https://static.wikia.nocookie.net/fortnite/images/6/6e/Gummy_Fishy_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183434',
+    13: 'https://static.wikia.nocookie.net/fortnite/images/6/6e/Gummy_Striker_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183501',
+    14: 'https://static.wikia.nocookie.net/fortnite/images/6/6e/Gummy_Aura_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183238',
+    15: 'https://static.wikia.nocookie.net/fortnite/images/6/6e/Gummy_Boss_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183115',
+    16: 'https://static.wikia.nocookie.net/fortnite/images/6/6e/Gummy_Grim_Reaper_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183144',
+    17: 'https://static.wikia.nocookie.net/fortnite/images/6/6e/Gummy_Aire_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183426',
+    18: 'https://static.wikia.nocookie.net/fortnite/images/6/6e/Gummy_Seven_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183452'
   },
   galaxy: {
     1: 'https://static.wikia.nocookie.net/fortnite/images/4/43/Galaxy_Water_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185046',
-    2: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Earth_Galaxy_ui_L.webp',
+    2: 'https://static.wikia.nocookie.net/fortnite/images/2/2e/Galaxy_Earth_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183911',
     3: 'https://static.wikia.nocookie.net/fortnite/images/b/bf/Galaxy_Fire_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185046',
     4: 'https://static.wikia.nocookie.net/fortnite/images/5/58/Galaxy_Duck_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183759',
     5: 'https://static.wikia.nocookie.net/fortnite/images/a/a8/Galaxy_Demon_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183548',
     6: 'https://static.wikia.nocookie.net/fortnite/images/2/2d/Galaxy_Ghost_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606184144',
     7: 'https://static.wikia.nocookie.net/fortnite/images/3/3f/Galaxy_King_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185045',
-    8: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Punk_Galaxy_ui_L.webp',
+    8: 'https://static.wikia.nocookie.net/fortnite/images/0/06/Galaxy_Punk_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183939',
     9: 'https://static.wikia.nocookie.net/fortnite/images/a/a2/Galaxy_Dream_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185046',
     10:'https://static.wikia.nocookie.net/fortnite/images/d/d2/Galaxy_Zero_Point_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606185046',
-    12: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fishy_Galaxy_ui_L.webp',
-    13: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Soccer_Galaxy_L.webp',
-    14: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_Galaxy_ui_L.webp',
-    15: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Boss_Galaxy_ui_L.webp',
-    16: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_GrimReaper_Galaxy_L.webp',
-    17: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Air_Galaxy_L.webp',
-    18: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_Galaxy_ui_L.webp'
+    12: 'https://static.wikia.nocookie.net/fortnite/images/6/6f/Galaxy_Fishy_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183849',
+    13: 'https://static.wikia.nocookie.net/fortnite/images/1/14/Galaxy_Striker_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183959',
+    14: 'https://static.wikia.nocookie.net/fortnite/images/d/dc/Galaxy_Aura_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183203',
+    15: 'https://static.wikia.nocookie.net/fortnite/images/d/d3/Galaxy_Boss_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183124',
+    16: 'https://static.wikia.nocookie.net/fortnite/images/d/d1/Galaxy_Grim_Reaper_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183024',
+    17: 'https://static.wikia.nocookie.net/fortnite/images/0/00/Galaxy_Aire_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183810',
+    18: 'https://static.wikia.nocookie.net/fortnite/images/a/a0/Galaxy_Seven_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606183905'
   }
 };
 

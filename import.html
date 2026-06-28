@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Importar Espíritus</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0D0D0D;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: #1A1A1A;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 8px; }
+    p { color: #888; font-size: 0.9rem; margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 6px; }
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      background: #2A2A2A;
+      border: 1px solid #3A3A3A;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+    }
+    input:focus { outline: none; border-color: #FF6B35; }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #FF6B35;
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    button:hover { background: #ff8555; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    .log {
+      margin-top: 20px;
+      padding: 16px;
+      background: #0D0D0D;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+    }
+    .log.show { display: block; }
+    .log-entry { padding: 4px 0; border-bottom: 1px solid #2A2A2A; }
+    .log-entry:last-child { border-bottom: none; }
+    .log-entry.error { color: #ff6b6b; }
+    .log-entry.success { color: #4ade80; }
+    .log-entry.info { color: #60a5fa; }
+    .warning {
+      background: #3A2A00;
+      border: 1px solid #5A4A00;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.8rem;
+      color: #F0D060;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Importar Datos de Espíritus</h1>
+    <p>Actualiza tu colección desde un archivo JSON</p>
+
+    <div class="warning">
+      ⚠️ Esto sobrescribirá TODOS tus datos actuales de espíritus. Esta acción no se puede deshacer.
+    </div>
+
+    <div class="form-group">
+      <label for="jsonInput">Pega aquí el JSON de tu colección:</label>
+      <textarea id="jsonInput" rows="10" placeholder='{ "espiritus": [...] }'></textarea>
+    </div>
+
+    <button id="importBtn">Importar Colección</button>
+
+    <div id="log" class="log"></div>
+  </div>
+
+  <script type="module">
+    import { supabase } from './supabase.js';
+
+    const spiritNameToId = {
+      'Water Sprite': 1, 'Earth Sprite': 2, 'Fire Sprite': 3, 'Duck Sprite': 4,
+      'Demon Sprite': 5, 'Ghost Sprite': 6, 'King Sprite': 7, 'Punk Sprite': 8,
+      'Dream Sprite': 9, 'Zero Point Sprite': 10, 'Burnt Peanut': 11, 'Fishy Sprite': 12,
+      'Striker Sprite': 13, 'Aura Sprite': 14, 'Boss Sprite': 15, 'Grim Sprite': 16,
+      'Grim Reaper Sprite': 16, 'Aire Sprite': 17, 'Seven Sprite': 18
+    };
+
+    const variantToSuffix = { 'Normal': '', 'Gold': '-gold', 'Gummy': '-gummy', 'Galaxy': '-galaxy' };
+
+    const spiritsWithoutVariants = [11, 17, 18];
+    const baseOnlyVariants = ['-gold', '-gummy', '-galaxy'];
+
+    const logEl = document.getElementById('log');
+    const importBtn = document.getElementById('importBtn');
+    const jsonInput = document.getElementById('jsonInput');
+
+    function log(msg, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function getSpiritId(nombre, variante) {
+      const baseId = spiritNameToId[nombre];
+      if (!baseId) return null;
+      const suffix = variantToSuffix[variante];
+      if (!suffix) return `base-${baseId}`;
+      return `${baseId}${suffix}`;
+    }
+
+    const validSpiritIds = new Set([
+      ...Array.from({length: 18}, (_, i) => `base-${i + 1}`),
+      ...[1,2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18].flatMap(id => [
+        `${id}-gold`, `${id}-gummy`, `${id}-galaxy`
+      ])
+    ]);
+
+    importBtn.addEventListener('click', async () => {
+      logEl.innerHTML = '';
+      logEl.classList.add('show');
+      importBtn.disabled = true;
+      importBtn.textContent = 'Importando...';
+
+      let data;
+      try {
+        data = JSON.parse(jsonInput.value);
+      } catch (e) {
+        log('JSON inválido: ' + e.message, 'error');
+        importBtn.disabled = false;
+        importBtn.textContent = 'Importar Colección';
+        return;
+      }
+
+      if (!data.espiritus || !Array.isArray(data.espiritus)) {
+        log('El JSON debe tener la propiedad "espiritus" con un array', 'error');
+        importBtn.disabled = false;
+        importBtn.textContent = 'Importar Colección';
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        log('No hay sesión activa. Inicia sesión en la app primero.', 'error');
+        importBtn.disabled = false;
+        importBtn.textContent = 'Importar Colección';
+        return;
+      }
+
+      const userId = session.user.id;
+      log(`Usuario: ${session.user.email}`, 'info');
+
+      const states = data.espiritus.map(item => {
+        const spiritId = getSpiritId(item.nombre, item.variante);
+        if (!spiritId) {
+          log(`No se encontró ID para: ${item.nombre} (${item.variante})`, 'error');
+          return null;
+        }
+        if (!validSpiritIds.has(spiritId)) {
+          log(`Variante no válida omitida: ${item.nombre} ${item.variante}`, 'info');
+          return null;
+        }
+        return {
+          user_id: userId,
+          spirit_id: spiritId,
+          level: item.nivel ?? 1,
+          lost: false,
+          register: item.nivel > 1 || item.dominado,
+          dominated: item.dominado ?? false
+        };
+      }).filter(Boolean);
+
+      log(`Procesando ${states.length} registros...`, 'info');
+
+      const { error: deleteError } = await supabase
+        .from('spirit_states')
+        .delete()
+        .eq('user_id', userId);
+
+      if (deleteError) {
+        log('Error al limpiar datos: ' + deleteError.message, 'error');
+        importBtn.disabled = false;
+        importBtn.textContent = 'Importar Colección';
+        return;
+      }
+      log('Datos anteriores eliminados', 'success');
+
+      const { error: insertError } = await supabase
+        .from('spirit_states')
+        .insert(states);
+
+      if (insertError) {
+        log('Error al insertar: ' + insertError.message, 'error');
+        importBtn.disabled = false;
+        importBtn.textContent = 'Importar Colección';
+        return;
+      }
+
+      log(`¡Importación completada! ${states.length} registros actualizados.`, 'success');
+      importBtn.disabled = false;
+      importBtn.textContent = 'Importar Colección';
+    });
+  </script>
+</body>
+</html>
