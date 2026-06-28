@@ -471,7 +471,41 @@ function createCard(item) {
           render();
           const newCard = document.querySelector(`[data-id="${item.id}"]`);
           if (newCard) triggerObtainedAnimation(newCard);
-}
+        }
+      }
+    });
+  };
+
+  const movePress = (e) => {
+    if (!pressTimer) return;
+    const dx = Math.abs(e.clientX - pressStartX);
+    const dy = Math.abs(e.clientY - pressStartY);
+    if (dx > 10 || dy > 10) didMove = true;
+  };
+
+  const endPress = () => {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+    card.classList.remove('pressing');
+  };
+
+  card.addEventListener('pointerdown', startPress);
+  card.addEventListener('pointermove', movePress);
+  card.addEventListener('pointerup', endPress);
+  card.addEventListener('pointerleave', endPress);
+  card.addEventListener('pointercancel', endPress);
+
+  card.addEventListener('click', (event) => {
+    if (didMove) return;
+    if (selectedItemId === String(item.id)) {
+      selectedItemId = null;
+    } else {
+      selectedItemId = String(item.id);
+    }
+    render();
+  });
+
+  return card;
 }
 
 function renderCollectionPosterHTML() {
@@ -542,38 +576,6 @@ function renderCollectionPosterHTML() {
       </div>
     </div>
   `;
-}
-
-const movePress = (e) => {
-    if (!pressTimer) return;
-    const dx = Math.abs(e.clientX - pressStartX);
-    const dy = Math.abs(e.clientY - pressStartY);
-    if (dx > 10 || dy > 10) didMove = true;
-  };
-
-  const endPress = () => {
-    clearTimeout(pressTimer);
-    pressTimer = null;
-    card.classList.remove('pressing');
-  };
-
-  card.addEventListener('pointerdown', startPress);
-  card.addEventListener('pointermove', movePress);
-  card.addEventListener('pointerup', endPress);
-  card.addEventListener('pointerleave', endPress);
-  card.addEventListener('pointercancel', endPress);
-
-  card.addEventListener('click', (event) => {
-    if (didMove) return;
-    if (selectedItemId === String(item.id)) {
-      selectedItemId = null;
-    } else {
-      selectedItemId = String(item.id);
-    }
-    render();
-  });
-
-  return card;
 }
 
 document.addEventListener('click', (event) => {
