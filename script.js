@@ -543,10 +543,8 @@ function renderCollectionPosterHTML() {
     </div>
   `;
 }
-    }, LONG_PRESS_MS);
-  };
 
-  const movePress = (e) => {
+const movePress = (e) => {
     if (!pressTimer) return;
     const dx = Math.abs(e.clientX - pressStartX);
     const dy = Math.abs(e.clientY - pressStartY);
