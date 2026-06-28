@@ -32,7 +32,7 @@ const specialTypeImages = {
     6: './Sprites/T_Icon_BR_Creature_Sprite_Ghost_Gold_L.webp',
     7: './Sprites/T_Icon_BR_Creature_Sprite_King_Gold_ui_L.webp',
     8: './Sprites/T_Icon_BR_Creature_Sprite_Punk_Gold_ui_L.webp',
-    9: './Sprites/T_Icon_BR_Creature_Sprite_Sleepy_Gold_L.webp',
+    9: './Sprites/T_Icon_BR_Creature_Sprite_Sleepy_Gold_ui_L.webp',
     10: './Sprites/T_Icon_BR_Creature_Sprite_ZeroPoint_Gold_ui_L.webp',
     12: './Sprites/T_Icon_BR_Creature_Sprite_Fishy_Gold_ui_L.webp',
     13: './Sprites/T_Icon_BR_Creature_Sprite_Soccer_Gold_L.webp',
@@ -66,7 +66,7 @@ const specialTypeImages = {
     6: './Sprites/T_Icon_BR_Creature_Sprite_Ghost_Galaxy_L.webp',
     7: './Sprites/T_Icon_BR_Creature_Sprite_King_Galaxy_ui_L.webp',
     8: './Sprites/T_Icon_BR_Creature_Sprite_Punk_Galaxy_ui_L.webp',
-    9: './Sprites/T_Icon_BR_Creature_Sprite_Sleepy_Galaxy_L.webp',
+    9: './Sprites/T_Icon_BR_Creature_Sprite_Sleepy_Galaxy_ui_L.webp',
     10: './Sprites/T_Icon_BR_Creature_Sprite_ZeroPoint_Galaxy_ui_L.webp',
     12: './Sprites/T_Icon_BR_Creature_Sprite_Fishy_Galaxy_ui_L.webp',
     13: './Sprites/T_Icon_BR_Creature_Sprite_Soccer_Galaxy_L.webp',
@@ -350,6 +350,7 @@ function createCard(item) {
   for (let i = 1; i <= 5; i++) {
     const pip = document.createElement('div');
     pip.className = 'level-pip';
+    if (i === 3) pip.classList.add('center-pip');
     if (i <= item.level) {
       pip.classList.add('filled');
       if (item.dominated) pip.classList.add('dominated');
@@ -358,6 +359,7 @@ function createCard(item) {
   }
   const levelNum = document.createElement('span');
   levelNum.className = 'level-num';
+  if (item.dominated) levelNum.classList.add('is-dominated');
   levelNum.textContent = `N${item.level}`;
   levelTrack.appendChild(levelNum);
 
@@ -881,6 +883,47 @@ searchInput.addEventListener('keydown', (e) => {
     searchQuery = '';
     searchResults.classList.add('hidden');
     render();
+    return;
+  }
+
+  if (!searchResults.classList.contains('hidden')) {
+    const items = searchResults.querySelectorAll('.search-result-item');
+    const currentSelected = searchResults.querySelector('.search-result-item.selected');
+    let newSelected = null;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (currentSelected) {
+        const next = currentSelected.nextElementSibling;
+        if (next && next.classList.contains('search-result-item')) {
+          currentSelected.classList.remove('selected');
+          next.classList.add('selected');
+          newSelected = next;
+        }
+      } else if (items.length > 0) {
+        items[0].classList.add('selected');
+        newSelected = items[0];
+      }
+      if (newSelected) {
+        newSelected.scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (currentSelected) {
+        const prev = currentSelected.previousElementSibling;
+        if (prev && prev.classList.contains('search-result-item')) {
+          currentSelected.classList.remove('selected');
+          prev.classList.add('selected');
+          newSelected = prev;
+        }
+      }
+      if (newSelected) {
+        newSelected.scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'Enter' && currentSelected) {
+      e.preventDefault();
+      currentSelected.click();
+    }
   }
 });
 
