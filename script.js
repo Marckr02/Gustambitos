@@ -921,17 +921,22 @@ supabase.auth.onAuthStateChange((_event, session) => {
 initAuth();
 
 downloadCollectionBtn?.addEventListener('click', () => {
+  downloadCollectionBtn.disabled = true;
+  downloadCollectionBtn.textContent = 'Generando...';
+
   renderCollectionPoster(true);
+
   setTimeout(() => {
     previewModal.classList.remove('hidden');
-  }, 50);
+    downloadCollectionBtn.disabled = false;
+    downloadCollectionBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Colección`;
+  }, 100);
 });
 
 function closePreview() {
   previewModal.classList.add('hidden');
   setTimeout(() => {
-    collectionPoster.innerHTML = '';
-    collectionPoster.classList.add('hidden');
+    previewContent.innerHTML = '';
   }, 300);
 }
 
@@ -975,19 +980,7 @@ function renderCollectionPoster(forPreview = false) {
   const registeredCount = getRegisteredCount();
   const totalCount = getTotalCount();
 
-  if (forPreview) {
-    collectionPoster.classList.remove('hidden');
-    collectionPoster.style.position = '';
-    collectionPoster.style.top = '';
-    collectionPoster.style.left = '';
-  } else {
-    collectionPoster.classList.remove('hidden');
-    collectionPoster.style.position = 'fixed';
-    collectionPoster.style.top = '-9999px';
-    collectionPoster.style.left = '-9999px';
-  }
-
-  collectionPoster.innerHTML = `
+  const posterHTML = `
     <div class="poster-header">
       <div class="poster-title">Mi Colección</div>
       <div class="poster-stats">
@@ -1019,9 +1012,6 @@ function renderCollectionPoster(forPreview = false) {
           { key: 'galaxy', spirit: galaxySpirit, img: getVariantImage(base.id, 'galaxy'), label: 'Galaxy' }
         ];
 
-        const dominatedAll = variants.every(v => v.spirit.dominated);
-        const registeredAll = variants.every(v => v.spirit.register);
-
         return `
           <div class="poster-group">
             <div class="poster-name-col">
@@ -1040,7 +1030,7 @@ function renderCollectionPoster(forPreview = false) {
                 const imgSrc = missingImage ? 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' : v.img;
                 return `
                   <div class="poster-sprite ${isNotCollected ? 'not-collected' : ''} ${isDominated ? 'dominated' : ''}">
-                    ${missingImage ? '' : `<img src="${imgSrc}" alt="${v.label}" crossorigin="anonymous" />`}
+                    ${missingImage ? '' : `<img src="${imgSrc}" alt="${v.label}" crossorigin="anonymous" onerror="this.parentElement.style.background='#ccc'" />`}
                   </div>
                 `;
               }).join('')}
@@ -1053,4 +1043,26 @@ function renderCollectionPoster(forPreview = false) {
       Generado con Control de Espíritus · ${new Date().toLocaleDateString('es-ES')}
     </div>
   `;
+
+  if (forPreview) {
+    collectionPoster.classList.add('hidden');
+    collectionPoster.style.position = 'fixed';
+    collectionPoster.style.top = '-9999px';
+    collectionPoster.style.left = '-9999px';
+    collectionPoster.innerHTML = posterHTML;
+    previewContent.innerHTML = '';
+    const clone = collectionPoster.cloneNode(true);
+    clone.classList.remove('hidden');
+    clone.style.position = 'relative';
+    clone.style.top = 'auto';
+    clone.style.left = 'auto';
+    clone.style.width = '100%';
+    previewContent.appendChild(clone);
+  } else {
+    collectionPoster.classList.remove('hidden');
+    collectionPoster.style.position = 'fixed';
+    collectionPoster.style.top = '-9999px';
+    collectionPoster.style.left = '-9999px';
+    collectionPoster.innerHTML = posterHTML;
+  }
 }
