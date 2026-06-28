@@ -361,19 +361,19 @@ main {
 
 .spirit-drop-rate {
   font-family: 'Exo 2', sans-serif;
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  padding: 3px 6px 2px;
-  border-radius: 4px;
+  padding: 4px 6px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.08);
-  color: rgb(185, 187, 190);
+  color: rgb(207, 213, 223);
+  letter-spacing: 0.03em;
 }
 
-.spirit-drop-rate.rare { background: rgba(0, 69, 138, 0.6); color: rgb(0, 255, 251); }
-.spirit-drop-rate.epic { background: rgba(76, 25, 123, 0.6); color: rgb(236, 39, 255); }
-.spirit-drop-rate.legendary { background: rgba(138, 60, 30, 0.6); color: rgb(251, 195, 99); }
-.spirit-drop-rate.mythic { background: rgba(124, 93, 38, 0.6); color: rgb(255, 240, 166); }
+.spirit-drop-rate.rare { background: rgba(0, 69, 138, 0.7); color: rgb(0, 255, 251); }
+.spirit-drop-rate.epic { background: rgba(76, 25, 123, 0.7); color: rgb(236, 39, 255); }
+.spirit-drop-rate.legendary { background: rgba(138, 60, 30, 0.7); color: rgb(251, 195, 99); }
+.spirit-drop-rate.mythic { background: rgba(124, 93, 38, 0.7); color: rgb(255, 240, 166); }
 
 .crown {
   font-size: 1rem;

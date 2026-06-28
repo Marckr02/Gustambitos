@@ -1,24 +1,24 @@
 import { supabase } from './supabase.js';
 
 const baseSprites = [
-  { id: 1, name: 'Water Sprite', rarity: 'rare', type: 'Elemental', image: 'https://static.wikia.nocookie.net/fortnite/images/a/a4/Water_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20241201124607', dropRate: 25 },
-  { id: 2, name: 'Earth Sprite',  rarity: 'rare', type: 'Elemental', image: 'https://static.wikia.nocookie.net/fortnite/images/c/cf/Earth_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606121336', dropRate: 25 },
-  { id: 3, name: 'Fire Sprite',  rarity: 'rare', type: 'Elemental', image: 'https://static.wikia.nocookie.net/fortnite/images/a/a4/Fire_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606121040', dropRate: 25 },
-  { id: 4, name: 'Duck Sprite',rarity: 'epic', type: 'Beast', image: 'https://static.wikia.nocookie.net/fortnite/images/d/d7/Duck_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120733', dropRate: 10 },
-  { id: 5, name: 'Demon Sprite', rarity: 'epic', type: 'Demon', image: 'https://static.wikia.nocookie.net/fortnite/images/9/9f/Demon_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120658', dropRate: 10 },
-  { id: 6, name: 'Ghost Sprite',  rarity: 'epic', type: 'Spirit', image: 'https://static.wikia.nocookie.net/fortnite/images/6/68/Ghost_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120821', dropRate: 10 },
-  { id: 7, name: 'King Sprite',rarity: 'epic', type: 'Royal', image: 'https://static.wikia.nocookie.net/fortnite/images/9/9f/King_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120900', dropRate: 10 },
-  { id: 8, name: 'Punk Sprite',  rarity: 'legendary', type: 'Rebel', image: 'https://static.wikia.nocookie.net/fortnite/images/0/02/Punk_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120226', dropRate: 5 },
-  { id: 9, name: 'Dream Sprite',  rarity: 'legendary', type: 'Dream', image: 'https://static.wikia.nocookie.net/fortnite/images/9/99/Dream_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606121205', dropRate: 5 },
-  { id: 10, name: 'Zero Point Sprite',  rarity: 'mythic', type: 'Cosmic', image: 'https://static.wikia.nocookie.net/fortnite/images/a/a4/Zero_Point_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120116', dropRate: 2 },
-  { id: 11, name: 'Burnt Peanut',  rarity: 'mythic', type: 'Mythic', image: 'https://static.wikia.nocookie.net/fortnite/images/0/0b/Burnt_Peanut_-_Item_-_Fortnite.png/revision/latest?cb=20260606183106', dropRate: 2 },
-  { id: 12, name: 'Fishy Sprite',  rarity: 'rare', type: 'Fish', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fishy_ui_L.webp', dropRate: 25 },
-  { id: 13, name: 'Striker Sprite',  rarity: 'epic', type: 'Strike', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Soccer_ui_L.webp', dropRate: 10 },
-  { id: 14, name: 'Aura Sprite',  rarity: 'epic', type: 'Aura', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_ui_L.webp', dropRate: 10 },
-  { id: 15, name: 'Boss Sprite',  rarity: 'legendary', type: 'Boss', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Boss_ui_L.webp', dropRate: 5 },
-  { id: 16, name: 'Grim Reaper Sprite',  rarity: 'mythic', type: 'Reaper', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_GrimReaper_Default_L.webp', dropRate: 2 },
-  { id: 17, name: 'Aire Sprite',  rarity: 'rare', type: 'Elemental', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Air_Default_L.webp', dropRate: 25 },
-  { id: 18, name: 'Seven Sprite',  rarity: 'legendary', type: 'Foundacion', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_ui_L.webp', dropRate: 5 }
+  { id: 1, name: 'Water Sprite', rarity: 'rare', type: 'Elemental', image: 'https://static.wikia.nocookie.net/fortnite/images/a/a4/Water_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20241201124607', dropRate: 12.45 },
+  { id: 2, name: 'Earth Sprite',  rarity: 'rare', type: 'Elemental', image: 'https://static.wikia.nocookie.net/fortnite/images/c/cf/Earth_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606121336', dropRate: 12.45 },
+  { id: 3, name: 'Fire Sprite',  rarity: 'rare', type: 'Elemental', image: 'https://static.wikia.nocookie.net/fortnite/images/a/a4/Fire_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606121040', dropRate: 12.45 },
+  { id: 4, name: 'Duck Sprite',rarity: 'epic', type: 'Beast', image: 'https://static.wikia.nocookie.net/fortnite/images/d/d7/Duck_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120733', dropRate: 5.74 },
+  { id: 5, name: 'Demon Sprite', rarity: 'epic', type: 'Demon', image: 'https://static.wikia.nocookie.net/fortnite/images/9/9f/Demon_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120658', dropRate: 5.76 },
+  { id: 6, name: 'Ghost Sprite',  rarity: 'epic', type: 'Spirit', image: 'https://static.wikia.nocookie.net/fortnite/images/6/68/Ghost_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120821', dropRate: 5.74 },
+  { id: 7, name: 'King Sprite',rarity: 'epic', type: 'Royal', image: 'https://static.wikia.nocookie.net/fortnite/images/9/9f/King_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120900', dropRate: 5.74 },
+  { id: 8, name: 'Punk Sprite',  rarity: 'legendary', type: 'Rebel', image: 'https://static.wikia.nocookie.net/fortnite/images/0/02/Punk_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120226', dropRate: 1.98 },
+  { id: 9, name: 'Dream Sprite',  rarity: 'legendary', type: 'Dream', image: 'https://static.wikia.nocookie.net/fortnite/images/9/99/Dream_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606121205', dropRate: 2.63 },
+  { id: 10, name: 'Zero Point Sprite',  rarity: 'mythic', type: 'Cosmic', image: 'https://static.wikia.nocookie.net/fortnite/images/a/a4/Zero_Point_Sprite_-_Item_-_Fortnite.png/revision/latest?cb=20260606120116', dropRate: 0.000098 },
+  { id: 11, name: 'Burnt Peanut',  rarity: 'mythic', type: 'Mythic', image: 'https://static.wikia.nocookie.net/fortnite/images/0/0b/Burnt_Peanut_-_Item_-_Fortnite.png/revision/latest?cb=20260606183106', dropRate: 1.01 },
+  { id: 12, name: 'Fishy Sprite',  rarity: 'rare', type: 'Fish', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fishy_ui_L.webp', dropRate: 13.79 },
+  { id: 13, name: 'Striker Sprite',  rarity: 'epic', type: 'Strike', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Soccer_ui_L.webp', dropRate: 5.74 },
+  { id: 14, name: 'Aura Sprite',  rarity: 'epic', type: 'Aura', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_ui_L.webp', dropRate: 5.74 },
+  { id: 15, name: 'Boss Sprite',  rarity: 'legendary', type: 'Boss', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Boss_ui_L.webp', dropRate: 2.63 },
+  { id: 16, name: 'Grim Reaper Sprite',  rarity: 'mythic', type: 'Reaper', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_GrimReaper_Default_L.webp', dropRate: 0.000098 },
+  { id: 17, name: 'Aire Sprite',  rarity: 'rare', type: 'Elemental', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Air_Default_L.webp', dropRate: 12.45 },
+  { id: 18, name: 'Seven Sprite',  rarity: 'legendary', type: 'Foundacion', image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_ui_L.webp', dropRate: 12.45 }
 ];
 
 const specialTypes = ['Gold', 'Gummy', 'Galaxy'];
@@ -118,23 +118,38 @@ let selectedItemId = null;
 let currentUser = null;
 let saveTimeout = null;
 
+const specialDropRates = {
+  gold: { mythic: 0.0000012, legendary: 0.03, epic: 0.07, rare: 0.17 },
+  gummy: { mythic: 0.0000006, legendary: 0.02, epic: 0.04, rare: 0.08 },
+  galaxy: { mythic: 0.0000004, legendary: 0.01, epic: 0.02, rare: 0.06 }
+};
+
 function generateSpecials() {
   return baseSprites
     .filter((sprite) => sprite.id !== 11)
-    .flatMap((sprite) =>
-      specialTypes.map((type) => ({
-        id: `${sprite.id}-${type.toLowerCase()}`,
-        name: sprite.name,
-        specialType: type,
-        type: sprite.type,
-        rarity: sprite.rarity,
-        image: getSpecialImageByType(sprite.id, type) || sprite.image,
-        level: 1,
-        lost: false,
-        register: false,
-        dominated: false
-      }))
-    );
+    .flatMap((sprite) => {
+      const rarityKey = sprite.rarity === 'mythic' ? 'mythic'
+        : sprite.rarity === 'legendary' ? 'legendary'
+        : sprite.rarity === 'epic' ? 'epic'
+        : 'rare';
+      return specialTypes.map((type) => {
+        const typeKey = type.toLowerCase();
+        const dropRate = specialDropRates[typeKey]?.[rarityKey] || 0.01;
+        return {
+          id: `${sprite.id}-${typeKey}`,
+          name: sprite.name,
+          specialType: type,
+          type: sprite.type,
+          rarity: sprite.rarity,
+          image: getSpecialImageByType(sprite.id, type) || sprite.image,
+          dropRate: dropRate,
+          level: 1,
+          lost: false,
+          register: false,
+          dominated: false
+        };
+      });
+    });
 }
 
 function generateAllItems() {
@@ -219,7 +234,8 @@ async function saveState() {
       dominated: item.dominated
     }));
 
-    const { error } = await supabase.from('spirit_states').upsert(states, { onConflict: 'user_id,spirit_id' });
+    await supabase.from('spirit_states').delete().eq('user_id', currentUser.id);
+    const { error } = await supabase.from('spirit_states').insert(states);
 
     if (error) {
       showSyncIndicator('error');
@@ -305,7 +321,12 @@ function createCard(item) {
 
   const dropRateTag = document.createElement('span');
   dropRateTag.className = `spirit-drop-rate ${item.rarity}`;
-  dropRateTag.textContent = `${item.dropRate}%`;
+  const formattedRate = item.dropRate < 0.001
+    ? item.dropRate.toFixed(6).replace(/0+$/, '').replace(/\.$/, '')
+    : item.dropRate < 1
+    ? item.dropRate.toFixed(2)
+    : item.dropRate.toFixed(2);
+  dropRateTag.textContent = `${formattedRate}%`;
 
   const imageFrame = document.createElement('div');
   imageFrame.className = 'spirit-image-frame';
