@@ -924,13 +924,18 @@ downloadCollectionBtn?.addEventListener('click', () => {
   downloadCollectionBtn.disabled = true;
   downloadCollectionBtn.textContent = 'Generando...';
 
-  renderCollectionPoster(true);
+  closePreview();
 
   setTimeout(() => {
     previewModal.classList.remove('hidden');
-    downloadCollectionBtn.disabled = false;
-    downloadCollectionBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Colección`;
-  }, 100);
+    previewContent.innerHTML = '<div class="poster-preview-loading">Generando vista previa...</div>';
+
+    setTimeout(() => {
+      previewContent.innerHTML = '<div class="poster-preview-text">Colección lista para descargar</div>';
+      downloadCollectionBtn.disabled = false;
+      downloadCollectionBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Colección`;
+    }, 500);
+  }, 50);
 });
 
 function closePreview() {
@@ -948,14 +953,7 @@ previewDownload?.addEventListener('click', async () => {
   previewDownload.textContent = 'Generando...';
 
   try {
-    const canvas = await html2canvas(collectionPoster, {
-      backgroundColor: '#F8F6F1',
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      logging: false
-    });
-
+    const canvas = await generatePosterCanvas();
     const link = document.createElement('a');
     link.download = `mi-coleccion-${new Date().toISOString().split('T')[0]}.png`;
     link.href = canvas.toDataURL('image/png');
@@ -973,6 +971,187 @@ previewDownload?.addEventListener('click', async () => {
 function getVariantImage(spriteId, variant) {
   const url = specialTypeImages[variant]?.[spriteId];
   return url || '';
+}
+
+const rarityColors = {
+  mythic: '#9B59B6',
+  legendary: '#F39C12',
+  epic: '#9B59B6',
+  rare: '#3498DB',
+  common: '#95A5A6'
+};
+
+async function generatePosterCanvas() {
+  const width = 900;
+  const rowHeight = 52;
+  const headerHeight = 100;
+  const footerHeight = 40;
+  const padding = 40;
+  const nameWidth = 130;
+  const spriteSize = 44;
+  const gap = 6;
+  const cols = 2;
+
+  const rowsPerCol = Math.ceil((baseSprites.length - 1) / cols);
+  const height = headerHeight + (rowsPerCol * rowHeight) + 50 + footerHeight;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width * 2;
+  canvas.height = height * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+
+  ctx.fillStyle = '#F8F6F1';
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = '#1A1A1A';
+  ctx.font = 'bold 28px "Exo 2", sans-serif';
+  ctx.textBaseline = 'top';
+  ctx.fillText('MI COLECCIÓN', padding, 30);
+
+  ctx.font = '14px "Inter", sans-serif';
+  ctx.fillStyle = '#7A756E';
+  const statsX = width - 200;
+  ctx.fillText(`Dominados: ${getDominatedCount()}  |  Obtenidos: ${getRegisteredCount()}  |  Total: ${getTotalCount()}`, statsX, 38);
+
+  ctx.strokeStyle = '#D4CFC6';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padding, headerHeight - 10);
+  ctx.lineTo(width - padding, headerHeight - 10);
+  ctx.stroke();
+
+  let col = 0;
+  let row = 0;
+  const colWidth = (width - padding * 2) / cols;
+
+  for (let idx = 0; idx < baseSprites.length; idx++) {
+    const base = baseSprites[idx];
+
+    if (idx === 10) {
+      row = 0;
+      col = 1;
+    }
+
+    const xBase = padding + col * colWidth;
+    const yBase = headerHeight + row * rowHeight;
+
+    if (idx === 10) {
+      const centerX = width / 2;
+      const burnedSpirit = spirits.find(s => s.id === 11) || { register: false, dominated: false };
+      const burntGroup = renderBurntPeanutGroup(ctx, centerX, yBase, burnedSpirit);
+      row++;
+      continue;
+    }
+
+    const baseSpirit = spirits.find(s => s.id === base.id) || { register: false, dominated: false };
+    const goldSpirit = specials.find(s => s.id === `${base.id}-gold`) || { register: false, dominated: false };
+    const gummySpirit = specials.find(s => s.id === `${base.id}-gummy`) || { register: false, dominated: false };
+    const galaxySpirit = specials.find(s => s.id === `${base.id}-galaxy`) || { register: false, dominated: false };
+
+    const name = base.name.replace(/ Sprite$/, '');
+    ctx.font = 'bold 13px "Inter", sans-serif';
+    ctx.fillStyle = baseSpirit.dominated ? '#C9A227' : '#1A1A1A';
+    ctx.fillText(name, xBase, yBase + 4);
+
+    const variants = [
+      { spirit: baseSpirit, color: '#C0C0C0', label: 'B' },
+      { spirit: goldSpirit, color: '#F0D060', label: 'G' },
+      { spirit: gummySpirit, color: '#F5A0D0', label: 'Y' },
+      { spirit: galaxySpirit, color: '#B090F0', label: 'X' }
+    ];
+
+    const variantStartX = xBase + nameWidth + 10;
+    variants.forEach((v, i) => {
+      const vx = variantStartX + i * (spriteSize + gap);
+      const vy = yBase + 4;
+
+      ctx.fillStyle = v.spirit.register ? v.color : '#E0E0E0';
+      ctx.strokeStyle = v.spirit.dominated ? '#C9A227' : '#D4CFC6';
+      ctx.lineWidth = v.spirit.dominated ? 2 : 1;
+
+      roundRect(ctx, vx, vy, spriteSize, spriteSize, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      if (!v.spirit.register) {
+        ctx.fillStyle = '#999';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('?', vx + spriteSize / 2, vy + spriteSize / 2);
+        ctx.textAlign = 'left';
+      } else if (v.spirit.dominated) {
+        ctx.fillStyle = '#C9A227';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('★', vx + spriteSize / 2, vy + spriteSize - 10);
+        ctx.textAlign = 'left';
+      }
+    });
+
+    row++;
+  }
+
+  ctx.strokeStyle = '#D4CFC6';
+  ctx.beginPath();
+  ctx.moveTo(padding, height - footerHeight - 10);
+  ctx.lineTo(width - padding, height - footerHeight - 10);
+  ctx.stroke();
+
+  ctx.font = '11px "Inter", sans-serif';
+  ctx.fillStyle = '#7A756E';
+  ctx.textAlign = 'center';
+  ctx.fillText(`Generado con Control de Espíritus · ${new Date().toLocaleDateString('es-ES')}`, width / 2, height - footerHeight + 15);
+  ctx.textAlign = 'left';
+
+  return canvas;
+}
+
+function renderBurntPeanutGroup(ctx, x, y, spirit) {
+  const spriteSize = 80;
+  const centerX = x;
+
+  ctx.font = 'bold 13px "Inter", sans-serif';
+  ctx.fillStyle = spirit.dominated ? '#C9A227' : '#1A1A1A';
+  ctx.textAlign = 'center';
+  ctx.fillText('Burnt Peanut', centerX, y + 4);
+
+  const vx = centerX - spriteSize / 2;
+  const vy = y + 20;
+
+  ctx.fillStyle = spirit.register ? '#8B4513' : '#E0E0E0';
+  ctx.strokeStyle = spirit.dominated ? '#C9A227' : '#D4CFC6';
+  ctx.lineWidth = spirit.dominated ? 2 : 1;
+
+  roundRect(ctx, vx, vy, spriteSize, spriteSize, 8);
+  ctx.fill();
+  ctx.stroke();
+
+  if (!spirit.register) {
+    ctx.fillStyle = '#999';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('?', centerX, vy + spriteSize / 2);
+  }
+
+  ctx.textAlign = 'left';
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
 }
 
 function renderCollectionPoster(forPreview = false) {

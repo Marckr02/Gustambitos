@@ -1886,18 +1886,36 @@ main {
   align-items: center;
   gap: 6px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  border: none;
+  background: #FF6B35;
+  border: 2px solid #FF6B35;
   border-radius: 8px;
-  color: var(--bg);
+  color: #FFFFFF;
   font-family: 'Fredoka', sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: all 0.15s;
 }
 
 .btn-download-confirm:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px var(--accent-glow);
+  background: #FFFFFF;
+  color: #FF6B35;
+}
+
+.poster-preview-loading,
+.poster-preview-text {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.1rem;
+  color: #5A5650;
+}
+
+.poster-preview-loading {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
